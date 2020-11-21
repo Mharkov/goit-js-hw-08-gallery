@@ -68,16 +68,21 @@ const ul = document.querySelector(".js-gallery");
 const imageRef = document.createElement("img");
 const lightboxDiv = document.querySelector(".js-lightbox");
 const lightboxDivClose = document.querySelector(".lightbox__overlay");
+const lightboxDivContent = document.querySelector(".lightbox__content");
 const lightboxImage = document.querySelector(".lightbox__image");
 const buttonClose = document.querySelector(
   'button[data-action="close-lightbox"]'
 );
 
+const arr = [];
+
 const listCreatR = (images) =>
-  images.forEach((image) => {
+  images.forEach((image, i) => {
     const listing = document.createElement("li");
     const linkRef = document.createElement("a");
     const imageRef = document.createElement("img");
+
+    arr.push(image.original);
 
     listing.classList.add("gallery__item");
     linkRef.classList.add("gallery__link");
@@ -86,6 +91,7 @@ const listCreatR = (images) =>
     imageRef.setAttribute("src", image.preview);
     imageRef.setAttribute("data-source", image.original);
     imageRef.setAttribute("alt", image.description);
+    imageRef.setAttribute("data-index", i++);
 
     linkRef.append(imageRef);
     listing.append(linkRef);
@@ -94,21 +100,50 @@ const listCreatR = (images) =>
 
 listCreatR(images);
 
+console.log(arr);
+
 function OnTagsClick(event) {
   event.preventDefault();
   if (event.target.nodeName !== "IMG") {
-    console.log(" Клик не туда");
     return;
   }
-  const target = event.target.dataset.source;
   lightboxDiv.classList.add("is-open");
+  const target = event.target.dataset.source;
   lightboxImage.setAttribute("src", target);
+
+  let indexSet = event.target.dataset.index;
+  lightboxImage.setAttribute("data-index", indexSet);
+
   window.addEventListener("keydown", onEscapePress);
+  ul.addEventListener("keydown", pagingImage);
 }
+
+function pagingImage(e) {
+  let finishSet = Number(lightboxImage.getAttribute("data-index"));
+
+  if (e.code === "ArrowRight") {
+    if (finishSet >= 8) {
+      lightboxImage.setAttribute("src", arr[8]);
+    } else {
+      lightboxImage.setAttribute("src", arr[finishSet + 1]);
+      lightboxImage.setAttribute("data-index", finishSet + 1);
+    }
+  } else if (e.code === "ArrowLeft") {
+    if (finishSet <= 0) {
+      lightboxImage.setAttribute("src", arr[0]);
+    } else {
+      lightboxImage.setAttribute("src", arr[finishSet - 1]);
+      lightboxImage.setAttribute("data-index", finishSet - 1);
+    }
+  }
+}
+
 function onCloseModal() {
   window.removeEventListener("keydown", onEscapePress);
   lightboxDiv.classList.remove("is-open");
   lightboxImage.setAttribute("src", "");
+  lightboxImage.setAttribute("data-index", "");
+  ul.removeEventListener("keydown", pagingImage);
 }
 
 ul.addEventListener("click", OnTagsClick);
