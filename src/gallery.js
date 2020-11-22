@@ -100,8 +100,6 @@ const listCreatR = (images) =>
 
 listCreatR(images);
 
-console.log(arr);
-
 function OnTagsClick(event) {
   event.preventDefault();
   if (event.target.nodeName !== "IMG") {
